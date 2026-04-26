@@ -8,7 +8,6 @@ def addBook():
     title = input("Title: ").strip()
     author = input("Author: ").strip()
 
-
     for book in books:
         if book["title"].lower() == title.lower():
             print("Book already in library")
@@ -25,7 +24,8 @@ def listBook():
     print("\n-- Books --")
     for book in sorted(books, key=lambda x: x["title"]):
         available = book["amount"] - book["loaned"]
-        print(f"{book['title']} - {book['author']} - {available}")
+     
+        print(f"{book['title']} - {book['author']} - Available: {available}/{book['amount']}")
 
 def removeBook(): 
     title = input("Title to remove: ").strip()
@@ -58,10 +58,9 @@ def loanBook():
                 return
             
             book["loaned"] += amount_to_loan
-            print(f"Loaned {amount_to_loan} copies of {title}")
+            print(f"Loaned {amount_to_loan} copies of '{title}'.")
             print(f"Remaining: {book['amount'] - book['loaned']}")
             return
-
 
     print("Book not available")
 
@@ -86,7 +85,7 @@ def returnBook():
         if book["title"].lower() == title.lower():
             if book["loaned"] > 0:
                 book["loaned"] -= 1
-                print(f"{title} returned.")
+                print(f"'{title}' returned.")
             else:
                 print("No copies loaned.")
             return
@@ -100,18 +99,20 @@ def updateBook():
         if book["title"].lower() == title.lower():
             try:
                 new_amount = int(input("New total amount: "))
-                if new_amount < book["loaned"]:
-                    print(f"Cannot set amount أقل than loaned ({book['loaned']}).")
-                    return
+               
                 if new_amount < 0:
-                    print("Invalid amount.")
+                    print("Invalid amount. Must be zero or greater.")
+                    return
+             
+                if new_amount < book["loaned"]:
+                    print(f"Cannot set amount lower than copies already loaned ({book['loaned']}).")
                     return
             except ValueError:
                 print("Invalid number.")
                 return
 
             book["amount"] = new_amount
-            print("Book updated")
+            print("Book updated.")
             return
        
     print("Book not available")
