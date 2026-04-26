@@ -1,4 +1,3 @@
-
 books = [
     {"title": "Dune", "author": "Frank Herbert", "amount": 10, "loaned": 7},
     {"title": "Project Hail Mary", "author": "Andy Weir", "amount": 4, "loaned": 4},
@@ -9,10 +8,10 @@ def addBook():
     title = input("Title: ").strip()
     author = input("Author: ").strip()
 
-#check for dupkicates
+
     for book in books:
         if book["title"].lower() == title.lower():
-            print("Books already in library")
+            print("Book already in library")
             return
     
     books.append({"title": title, "author": author, "amount": 1, "loaned": 0})
@@ -24,11 +23,9 @@ def listBook():
         return
     
     print("\n-- Books --")
-    #order by title key
     for book in sorted(books, key=lambda x: x["title"]):
-        status = f"{book['loaned']}/{book['amount']} loaned"
-        amount = "amount"
-        print(f"{book['title']} by {book['author']} - {status}")
+        available = book["amount"] - book["loaned"]
+        print(f"{book['title']} - {book['author']} - {available}")
 
 def removeBook(): 
     title = input("Title to remove: ").strip()
@@ -41,27 +38,42 @@ def removeBook():
     print("Book not found")
 
 def loanBook():
-    title = input("title to loan: ").strip()
+    title = input("Title to loan: ").strip()
 
+    try:
+        amount_to_loan = int(input("How many to loan: "))
+        if amount_to_loan <= 0:
+            print("Must be higher than zero.")
+            return
+    except ValueError:
+        print("Invalid number")
+        return
+    
     for book in books:
         if book["title"].lower() == title.lower():
-            if book["loaned"] < book["amount"]:
-                book["loaned"] += 1
-                print("Book loaned")
-            else:
-                print("No copies available.")
+            available = book["amount"] - book["loaned"]
+
+            if amount_to_loan > available:
+                print(f"Can't loan {amount_to_loan}. Only {available} available.")
+                return
+            
+            book["loaned"] += amount_to_loan
+            print(f"Loaned {amount_to_loan} copies of {title}")
+            print(f"Remaining: {book['amount'] - book['loaned']}")
             return
-       
+
+
     print("Book not available")
 
 def loanHistory():
-    loaned = [book for book in books if book["loaned"]]
+    loaned = [book for book in books if book["loaned"] > 0]
 
     if not loaned:
-        print("no loaned books")
+        print("No loaned books")
         return
-    print("\n - loaned -")
-    print(f"Loaned books: {len(loaned)}")
+
+    print("\n-- Loaned Books --")
+    print(f"Total: {len(loaned)}")
     print("-" * 25)
 
     for book in sorted(loaned, key=lambda x: x["title"]):
@@ -82,12 +94,23 @@ def returnBook():
     print("No such title found.")
 
 def updateBook():
-    title = input("title to loan: ").strip()
+    title = input("Title to update: ").strip()
 
     for book in books:
         if book["title"].lower() == title.lower():
-            new_status = int(input("New amount: "))
-            book["amount"] = new_status
+            try:
+                new_amount = int(input("New total amount: "))
+                if new_amount < book["loaned"]:
+                    print(f"Cannot set amount أقل than loaned ({book['loaned']}).")
+                    return
+                if new_amount < 0:
+                    print("Invalid amount.")
+                    return
+            except ValueError:
+                print("Invalid number.")
+                return
+
+            book["amount"] = new_amount
             print("Book updated")
             return
        
@@ -95,7 +118,7 @@ def updateBook():
 
 def menu():
     while True:
-        print("\n---MENU---")
+        print("\n--- MENU ---")
         print("1 - Add book")
         print("2 - Remove book")
         print("3 - List books")
